@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import {
   Animated,
-  Easing,
   Pressable,
   StyleSheet,
   Text,
@@ -10,7 +9,7 @@ import {
 } from 'react-native';
 import type { GameState } from '../engine/types';
 import { CriterionChip } from './CriterionChip';
-import { colors, radius } from '../theme';
+import { font, radius, useTheme, Palette } from '../theme';
 
 interface Props {
   state: GameState;
@@ -18,7 +17,11 @@ interface Props {
   disabled: boolean;
 }
 
-// Tek hücre: işaret konduğunda yaylı büyüme, kazanan çizgide parlama animasyonu.
+// %12 opaklıkta iOS "tinted" zemin
+function tinted(hex: string, alpha: string): string {
+  return hex + alpha;
+}
+
 function Cell({
   owner,
   playerName,
@@ -26,6 +29,7 @@ function Cell({
   size,
   onPress,
   disabled,
+  c,
 }: {
   owner: 'X' | 'O' | null;
   playerName: string | null;
@@ -33,17 +37,17 @@ function Cell({
   size: number;
   onPress: () => void;
   disabled: boolean;
+  c: Palette;
 }) {
   const scale = useRef(new Animated.Value(owner ? 1 : 0)).current;
-  const glow = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (owner) {
-      scale.setValue(0.2);
+      scale.setValue(0.4);
       Animated.spring(scale, {
         toValue: 1,
-        friction: 5,
-        tension: 120,
+        friction: 6,
+        tension: 140,
         useNativeDriver: true,
       }).start();
     } else {
@@ -51,79 +55,51 @@ function Cell({
     }
   }, [owner, playerName, scale]);
 
-  useEffect(() => {
-    if (!inWinLine) return;
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(glow, {
-          toValue: 1,
-          duration: 500,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: false,
-        }),
-        Animated.timing(glow, {
-          toValue: 0,
-          duration: 500,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: false,
-        }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [inWinLine, glow]);
-
-  const borderColor = inWinLine
-    ? glow.interpolate({ inputRange: [0, 1], outputRange: [colors.accent, '#FFF3C4'] })
-    : owner === 'X'
-      ? colors.x
-      : owner === 'O'
-        ? colors.o
-        : colors.border;
+  const tint = owner === 'X' ? c.x : owner === 'O' ? c.o : null;
 
   return (
     <Pressable onPress={onPress} disabled={disabled} style={{ width: size, height: size }}>
       {({ pressed }) => (
-        <Animated.View
+        <View
           style={[
             styles.cell,
-            owner === 'X' && styles.cellX,
-            owner === 'O' && styles.cellO,
-            pressed && !owner && styles.cellPressed,
-            { borderColor, borderWidth: inWinLine ? 2.5 : 1 },
+            {
+              backgroundColor: tint ? tinted(tint, '1F') : pressed ? c.fill : c.card,
+              borderColor: inWinLine ? c.yellow : tint ?? c.separator,
+              borderWidth: inWinLine ? 2 : tint ? 1.5 : StyleSheet.hairlineWidth,
+            },
           ]}
         >
           {owner ? (
-            <Animated.View style={{ alignItems: 'center', transform: [{ scale }] }}>
-              <Text style={[styles.mark, { color: owner === 'X' ? colors.x : colors.o }]}>
-                {owner}
-              </Text>
-              <Text style={styles.playerName} numberOfLines={2}>
+            <Animated.View style={{ alignItems: 'center', transform: [{ scale }], gap: 2 }}>
+              <Text style={[styles.mark, { color: tint! }]}>{owner === 'X' ? '✕' : '◯'}</Text>
+              <Text style={[styles.playerName, { color: c.secondaryLabel }]} numberOfLines={2}>
                 {playerName}
               </Text>
             </Animated.View>
           ) : (
-            <Text style={styles.empty}>+</Text>
+            <Text style={[styles.empty, { color: c.tertiaryLabel }]}>＋</Text>
           )}
-        </Animated.View>
+        </View>
       )}
     </Pressable>
   );
 }
 
 export function Board({ state, onCellPress, disabled }: Props) {
+  const c = useTheme();
   const { width } = useWindowDimensions();
-  const size = Math.min(width - 24, 420);
-  const head = size * 0.2;
+  const size = Math.min(width - 32, 420);
+  const head = size * 0.19;
   const cell = (size - head) / 3;
 
   return (
     <View style={{ width: size, alignSelf: 'center' }}>
       <View style={{ flexDirection: 'row', height: head }}>
         <View style={{ width: head }} />
-        {state.grid.cols.map((c, i) => (
+        {state.grid.cols.map((col, i) => (
           <View key={i} style={{ width: cell, padding: 2 }}>
-            <CriterionChip criterion={c} />
+            <CriterionChip criterion={col} />
           </View>
         ))}
       </View>
@@ -132,11 +108,11 @@ export function Board({ state, onCellPress, disabled }: Props) {
           <View style={{ width: head, padding: 2, justifyContent: 'center' }}>
             <CriterionChip criterion={state.grid.rows[r]} />
           </View>
-          {[0, 1, 2].map((c) => {
-            const idx = r * 3 + c;
+          {[0, 1, 2].map((col) => {
+            const idx = r * 3 + col;
             const cs = state.cells[idx];
             return (
-              <View key={c} style={{ padding: 3 }}>
+              <View key={col} style={{ padding: 3 }}>
                 <Cell
                   owner={cs.owner}
                   playerName={cs.playerName}
@@ -144,6 +120,7 @@ export function Board({ state, onCellPress, disabled }: Props) {
                   size={cell - 6}
                   onPress={() => onCellPress(idx)}
                   disabled={disabled}
+                  c={c}
                 />
               </View>
             );
@@ -158,15 +135,11 @@ const styles = StyleSheet.create({
   cell: {
     flex: 1,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 4,
   },
-  cellPressed: { backgroundColor: colors.surfaceHigh },
-  cellX: { backgroundColor: '#12281F' },
-  cellO: { backgroundColor: '#14213A' },
-  mark: { fontSize: 26, fontWeight: '900' },
-  playerName: { color: colors.textDim, fontSize: 9, textAlign: 'center', fontWeight: '600' },
-  empty: { color: colors.border, fontSize: 24, fontWeight: '300' },
+  mark: { fontSize: 24, fontWeight: '700' },
+  playerName: { fontSize: 9, textAlign: 'center', fontWeight: '500' },
+  empty: { fontSize: font.h2, fontWeight: '300' },
 });

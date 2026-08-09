@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { GameState, Mark } from '../engine/types';
-import { colors, font, radius } from '../theme';
+import { font, radius, useTheme, Palette } from '../theme';
 
 interface Props {
   state: GameState;
@@ -15,24 +15,31 @@ function PlayerCard({
   captured,
   steals,
   active,
+  c,
 }: {
   mark: Mark;
   label: string;
   captured: number;
   steals: number;
   active: boolean;
+  c: Palette;
 }) {
-  const color = mark === 'X' ? colors.x : colors.o;
+  const color = mark === 'X' ? c.x : c.o;
   return (
-    <View style={[styles.card, active && { borderColor: color, backgroundColor: colors.surfaceHigh }]}>
-      <View style={[styles.markBadge, { backgroundColor: color }]}>
-        <Text style={styles.markText}>{mark}</Text>
+    <View
+      style={[
+        styles.card,
+        { backgroundColor: c.card, borderColor: active ? color : 'transparent' },
+      ]}
+    >
+      <View style={[styles.markBadge, { backgroundColor: color + '1F' }]}>
+        <Text style={[styles.markText, { color }]}>{mark === 'X' ? '✕' : '◯'}</Text>
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={styles.label} numberOfLines={1}>
+        <Text style={[styles.label, { color: c.label }]} numberOfLines={1}>
           {label}
         </Text>
-        <Text style={styles.steals}>{'⚡'.repeat(steals) || '—'}</Text>
+        <Text style={[styles.steals, { color: c.orange }]}>{'⚡'.repeat(steals) || '·'}</Text>
       </View>
       <Text style={[styles.captured, { color }]}>{captured}</Text>
     </View>
@@ -40,7 +47,8 @@ function PlayerCard({
 }
 
 export function Scoreboard({ state, labelX, labelO }: Props) {
-  const captured = (m: Mark) => state.cells.filter((c) => c.owner === m).length;
+  const c = useTheme();
+  const captured = (m: Mark) => state.cells.filter((cell) => cell.owner === m).length;
   return (
     <View style={styles.row}>
       <PlayerCard
@@ -49,43 +57,41 @@ export function Scoreboard({ state, labelX, labelO }: Props) {
         captured={captured('X')}
         steals={state.stealsLeft.X}
         active={!state.winner && state.turn === 'X'}
+        c={c}
       />
-      <Text style={styles.vs}>VS</Text>
       <PlayerCard
         mark="O"
         label={labelO}
         captured={captured('O')}
         steals={state.stealsLeft.O}
         active={!state.winner && state.turn === 'O'}
+        c={c}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  vs: { color: colors.textDim, fontWeight: '900', fontSize: font.small },
+  row: { flexDirection: 'row', gap: 10 },
   card: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: colors.surface,
+    gap: 10,
     borderWidth: 1.5,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    borderRadius: radius.lg,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   markBadge: {
-    width: 26,
-    height: 26,
-    borderRadius: 8,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  markText: { color: colors.bg, fontWeight: '900', fontSize: 14 },
-  label: { color: colors.text, fontWeight: '700', fontSize: font.small },
-  steals: { color: colors.accent, fontSize: 10 },
-  captured: { fontWeight: '900', fontSize: font.h1 },
+  markText: { fontWeight: '700', fontSize: font.sub },
+  label: { fontWeight: '600', fontSize: font.small },
+  steals: { fontSize: 10 },
+  captured: { fontWeight: '700', fontSize: font.h2 },
 });

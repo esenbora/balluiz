@@ -2,18 +2,19 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { Criterion } from '../engine/types';
 import { clubById, nationById } from '../data/clubs';
-import { colors, radius } from '../theme';
+import { font, radius, useTheme } from '../theme';
 
 // Satır/sütun kriteri rozeti: kulüpler renkli kısaltma, ülkeler bayrak gösterir.
 export function CriterionChip({ criterion }: { criterion: Criterion }) {
+  const c = useTheme();
   if (criterion.kind === 'club') {
     const club = clubById.get(criterion.id);
     return (
       <View style={styles.wrap}>
-        <View style={[styles.badge, { backgroundColor: club?.color ?? colors.surfaceHigh }]}>
+        <View style={[styles.badge, { backgroundColor: club?.color ?? c.fill }]}>
           <Text style={styles.badgeText}>{club?.short ?? '?'}</Text>
         </View>
-        <Text style={styles.label} numberOfLines={2}>
+        <Text style={[styles.label, { color: c.secondaryLabel }]} numberOfLines={2}>
           {club?.name ?? criterion.id}
         </Text>
       </View>
@@ -23,7 +24,7 @@ export function CriterionChip({ criterion }: { criterion: Criterion }) {
   return (
     <View style={styles.wrap}>
       <Text style={styles.flag}>{nation?.flag ?? '🏳️'}</Text>
-      <Text style={styles.label} numberOfLines={2}>
+      <Text style={[styles.label, { color: c.secondaryLabel }]} numberOfLines={2}>
         {nation?.name ?? criterion.id}
       </Text>
     </View>
@@ -33,14 +34,14 @@ export function CriterionChip({ criterion }: { criterion: Criterion }) {
 const styles = StyleSheet.create({
   wrap: { alignItems: 'center', justifyContent: 'center', gap: 3, flex: 1 },
   badge: {
-    minWidth: 40,
-    paddingHorizontal: 6,
+    minWidth: 42,
+    paddingHorizontal: 7,
     height: 26,
     borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  badgeText: { color: '#fff', fontWeight: '800', fontSize: 12, letterSpacing: 0.5 },
-  flag: { fontSize: 22 },
-  label: { color: colors.textDim, fontSize: 10, textAlign: 'center', fontWeight: '600' },
+  badgeText: { color: '#fff', fontWeight: '700', fontSize: font.small, letterSpacing: 0.3 },
+  flag: { fontSize: 24 },
+  label: { fontSize: font.caption, textAlign: 'center', fontWeight: '500' },
 });

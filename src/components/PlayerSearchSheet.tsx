@@ -15,7 +15,7 @@ import type { PlayerSeed } from '../data/players';
 import { nationById } from '../data/clubs';
 import type { Criterion } from '../engine/types';
 import { CriterionChip } from './CriterionChip';
-import { colors, radius } from '../theme';
+import { font, radius, useTheme } from '../theme';
 import { Lang, t } from '../i18n';
 
 interface Props {
@@ -28,8 +28,9 @@ interface Props {
   onClose: () => void;
 }
 
-// Hücreye cevap girme alt sayfası: anlık öneriler, Türkçe karakter toleransı.
+// Hücreye cevap girme sayfası: iOS sheet görünümü, anlık öneriler, TR karakter toleransı.
 export function PlayerSearchSheet({ visible, row, col, hintCount, lang, onSubmit, onClose }: Props) {
+  const c = useTheme();
   const [query, setQuery] = useState('');
   const suggestions = useMemo(() => (query.length >= 2 ? searchPlayers(query) : []), [query]);
 
@@ -49,21 +50,22 @@ export function PlayerSearchSheet({ visible, row, col, hintCount, lang, onSubmit
         style={styles.backdrop}
       >
         <Pressable style={{ flex: 1 }} onPress={close} />
-        <View style={styles.sheet}>
+        <View style={[styles.sheet, { backgroundColor: c.card }]}>
+          <View style={[styles.grabber, { backgroundColor: c.tertiaryLabel }]} />
           <View style={styles.criteriaRow}>
             {row && <CriterionChip criterion={row} />}
-            <Text style={styles.plus}>+</Text>
+            <Text style={[styles.plus, { color: c.secondaryLabel }]}>+</Text>
             {col && <CriterionChip criterion={col} />}
           </View>
-          <Text style={styles.hint}>
+          <Text style={[styles.hint, { color: c.secondaryLabel }]}>
             {t('searchHint', lang)} · {hintCount} {t('possibleAnswers', lang)}
           </Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: c.fill, color: c.label }]}
             value={query}
             onChangeText={setQuery}
-            placeholder={t('searchPlayer', lang)}
-            placeholderTextColor={colors.textDim}
+            placeholder={'🔍  ' + t('searchPlayer', lang)}
+            placeholderTextColor={c.secondaryLabel}
             autoFocus
             autoCorrect={false}
             autoCapitalize="words"
@@ -74,17 +76,24 @@ export function PlayerSearchSheet({ visible, row, col, hintCount, lang, onSubmit
             data={suggestions}
             keyboardShouldPersistTaps="handled"
             keyExtractor={(p: PlayerSeed) => p.name}
-            style={{ maxHeight: 240 }}
+            style={{ maxHeight: 250 }}
             renderItem={({ item }) => (
-              <Pressable style={styles.suggestion} onPress={() => submit(item.name)}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.suggestion,
+                  { borderBottomColor: c.separator },
+                  pressed && { backgroundColor: c.fill },
+                ]}
+                onPress={() => submit(item.name)}
+              >
                 <Text style={styles.suggestionFlag}>{nationById.get(item.nat)?.flag ?? ''}</Text>
-                <Text style={styles.suggestionText}>{item.name}</Text>
-                <Text style={styles.suggestionPos}>{item.pos}</Text>
+                <Text style={[styles.suggestionText, { color: c.label }]}>{item.name}</Text>
+                <Text style={[styles.suggestionPos, { color: c.tertiaryLabel }]}>{item.pos}</Text>
               </Pressable>
             )}
           />
           <Pressable style={styles.cancel} onPress={close}>
-            <Text style={styles.cancelText}>{t('cancel', lang)}</Text>
+            <Text style={[styles.cancelText, { color: c.tint }]}>{t('cancel', lang)}</Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -93,14 +102,15 @@ export function PlayerSearchSheet({ visible, row, col, hintCount, lang, onSubmit
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
     padding: 16,
+    paddingTop: 8,
     gap: 10,
   },
+  grabber: { alignSelf: 'center', width: 36, height: 5, borderRadius: 3, opacity: 0.4 },
   criteriaRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -108,30 +118,25 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 4,
   },
-  plus: { color: colors.accent, fontSize: 20, fontWeight: '800' },
-  hint: { color: colors.textDim, textAlign: 'center', fontSize: 12 },
+  plus: { fontSize: font.h2, fontWeight: '600' },
+  hint: { textAlign: 'center', fontSize: font.small },
   input: {
-    backgroundColor: colors.bg,
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    color: colors.text,
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
+    paddingVertical: 11,
+    fontSize: font.body,
   },
   suggestion: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    paddingVertical: 10,
+    paddingVertical: 11,
     paddingHorizontal: 6,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
   },
-  suggestionFlag: { fontSize: 18 },
-  suggestionText: { color: colors.text, fontSize: 15, flex: 1, fontWeight: '600' },
-  suggestionPos: { color: colors.textDim, fontSize: 12, fontWeight: '700' },
-  cancel: { alignItems: 'center', paddingVertical: 10 },
-  cancelText: { color: colors.textDim, fontWeight: '700' },
+  suggestionFlag: { fontSize: font.body },
+  suggestionText: { fontSize: font.body, flex: 1, fontWeight: '500' },
+  suggestionPos: { fontSize: font.small, fontWeight: '600' },
+  cancel: { alignItems: 'center', paddingVertical: 12 },
+  cancelText: { fontWeight: '600', fontSize: font.body },
 });

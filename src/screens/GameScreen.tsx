@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Modal, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { Board } from '../components/Board';
 import { PlayerSearchSheet } from '../components/PlayerSearchSheet';
 import { Scoreboard } from '../components/Scoreboard';
@@ -7,18 +7,23 @@ import { chooseAiMove } from '../engine/ai';
 import { cellCriteria, cellSolutions, newGame, pass, play } from '../engine/game';
 import { normalize } from '../engine/normalize';
 import type { GameConfig, GameState } from '../engine/types';
-import { colors, font, radius } from '../theme';
+import { font, radius, useTheme } from '../theme';
 import { Lang, t } from '../i18n';
+import { buildShareText, dailyNumber } from '../social/daily';
+import { recordResult } from '../social/stats';
 
 interface Props {
   config: GameConfig;
+  daily?: boolean;
+  challengeCode?: string;
   lang: Lang;
   onExit: () => void;
 }
 
 const AI_MARK = 'O';
 
-export function GameScreen({ config, lang, onExit }: Props) {
+export function GameScreen({ config, daily, challengeCode, lang, onExit }: Props) {
+  const c = useTheme();
   const stateRef = useRef<GameState>(newGame(config));
   const [, setVersion] = useState(0);
   const bump = useCallback(() => setVersion((v) => v + 1), []);
@@ -27,6 +32,7 @@ export function GameScreen({ config, lang, onExit }: Props) {
   const [toast, setToast] = useState<string | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(config.turnSeconds);
   const aiMoveCounter = useRef(0);
+  const recorded = useRef(false);
   const timerAnim = useRef(new Animated.Value(1)).current;
 
   const state = stateRef.current;
@@ -37,7 +43,7 @@ export function GameScreen({ config, lang, onExit }: Props) {
     setTimeout(() => setToast(null), 1800);
   }, []);
 
-  // Tur sayacı: süre dolarsa pas. Üstteki çubuk turla birlikte erir.
+  // Tur sayacı + eriyen çubuk.
   useEffect(() => {
     if (state.winner) return;
     setSecondsLeft(config.turnSeconds);
@@ -81,6 +87,14 @@ export function GameScreen({ config, lang, onExit }: Props) {
     return () => clearTimeout(timer);
   }, [isAiTurn, state.turn, config.seed, bump]);
 
+  // Maç bitince istatistiğe işle (yalnızca bota karşı modlar).
+  useEffect(() => {
+    if (!state.winner || recorded.current || config.mode !== 'ai') return;
+    recorded.current = true;
+    const result = state.winner === 'draw' ? 'draw' : state.winner === 'X' ? 'win' : 'loss';
+    recordResult(result, !!daily).catch(() => {});
+  }, [state.winner, config.mode, daily]);
+
   const onCellPress = (index: number) => {
     if (state.winner || isAiTurn) return;
     const cell = state.cells[index];
@@ -100,6 +114,17 @@ export function GameScreen({ config, lang, onExit }: Props) {
     bump();
   };
 
+  const share = () => {
+    Share.share({
+      message: buildShareText(state, {
+        daily: !!daily,
+        dailyNo: dailyNumber(),
+        code: challengeCode,
+        lang,
+      }),
+    }).catch(() => {});
+  };
+
   const criteria = selectedCell !== null ? cellCriteria(state, selectedCell) : null;
   const hintCount =
     selectedCell !== null
@@ -109,6 +134,11 @@ export function GameScreen({ config, lang, onExit }: Props) {
 
   const labelX = config.mode === 'ai' ? t('you', lang) : t('player1', lang);
   const labelO = config.mode === 'ai' ? t('bot', lang) : t('player2', lang);
+  const navTitle = daily
+    ? `${t('dailyGrid', lang)} #${dailyNumber()}`
+    : challengeCode
+      ? `${t('code', lang)}: ${challengeCode}`
+      : '';
 
   const resultText = () => {
     if (state.winner === 'draw') return t('draw', lang);
@@ -118,70 +148,90 @@ export function GameScreen({ config, lang, onExit }: Props) {
     return state.winner === 'X' ? t('xWins', lang) : t('oWins', lang);
   };
 
-  const capturedX = state.cells.filter((c) => c.owner === 'X').length;
-  const capturedO = state.cells.filter((c) => c.owner === 'O').length;
+  const capturedX = state.cells.filter((cell) => cell.owner === 'X').length;
+  const capturedO = state.cells.filter((cell) => cell.owner === 'O').length;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.topBar}>
-        <Pressable onPress={onExit} hitSlop={12}>
-          <Text style={styles.back}>‹ {t('home', lang)}</Text>
+    <View style={[styles.container, { backgroundColor: c.bg }]}>
+      {/* iOS gezinme çubuğu */}
+      <View style={styles.navBar}>
+        <Pressable onPress={onExit} hitSlop={12} style={styles.navBack}>
+          <Text style={[styles.navBackChevron, { color: c.tint }]}>‹</Text>
+          <Text style={[styles.navBackText, { color: c.tint }]}>{t('home', lang)}</Text>
         </Pressable>
+        <Text style={[styles.navTitle, { color: c.label }]} numberOfLines={1}>
+          {navTitle}
+        </Text>
         <Text
-          style={[styles.timerText, secondsLeft <= 5 && { color: colors.danger }]}
+          style={[
+            styles.navTimer,
+            { color: secondsLeft <= 5 ? c.red : c.secondaryLabel },
+          ]}
         >{`${secondsLeft}${t('seconds', lang)}`}</Text>
       </View>
 
-      {/* Tur süresi çubuğu */}
-      <View style={styles.timerTrack}>
+      <View style={[styles.timerTrack, { backgroundColor: c.fill }]}>
         <Animated.View
           style={[
             styles.timerFill,
             {
-              backgroundColor: secondsLeft <= 5 ? colors.danger : colors.primary,
+              backgroundColor: secondsLeft <= 5 ? c.red : c.tint,
               width: timerAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
             },
           ]}
         />
       </View>
 
-      <View style={{ marginVertical: 14 }}>
+      <View style={{ marginVertical: 14, paddingHorizontal: 16 }}>
         <Scoreboard state={state} labelX={labelX} labelO={labelO} />
       </View>
 
       <Board state={state} onCellPress={onCellPress} disabled={!!state.winner || isAiTurn} />
 
-      {isAiTurn && <Text style={styles.aiThinking}>{t('aiTurn', lang)}</Text>}
+      {isAiTurn && (
+        <Text style={[styles.aiThinking, { color: c.secondaryLabel }]}>{t('aiTurn', lang)}</Text>
+      )}
 
       {toast && (
-        <View style={styles.toast}>
+        <View style={[styles.toast, { backgroundColor: c.red }]}>
           <Text style={styles.toastText}>{toast}</Text>
         </View>
       )}
 
       <Modal visible={!!state.winner} transparent animationType="fade">
         <View style={styles.resultBackdrop}>
-          <View style={styles.resultCard}>
+          <View style={[styles.resultCard, { backgroundColor: c.card }]}>
             <Text style={styles.resultEmoji}>
               {state.winner === 'draw' ? '🤝' : state.winner === 'X' ? '🏆' : '🥈'}
             </Text>
-            <Text style={styles.resultText}>{resultText()}</Text>
-            <Text style={styles.resultScore}>
-              {t('finalScore', lang)}: {labelX} {capturedX} — {capturedO} {labelO}
+            <Text style={[styles.resultText, { color: c.label }]}>{resultText()}</Text>
+            <Text style={[styles.resultScore, { color: c.secondaryLabel }]}>
+              {labelX} {capturedX} — {capturedO} {labelO}
             </Text>
             <View style={styles.resultButtons}>
-              <Pressable
-                style={styles.primaryBtn}
-                onPress={() => {
-                  stateRef.current = newGame({ ...config, seed: config.seed + 1 });
-                  aiMoveCounter.current = 0;
-                  bump();
-                }}
-              >
-                <Text style={styles.primaryBtnText}>{t('rematch', lang)}</Text>
+              <Pressable style={[styles.primaryBtn, { backgroundColor: c.tint }]} onPress={share}>
+                <Text style={styles.primaryBtnText}>{t('share', lang)}</Text>
               </Pressable>
-              <Pressable style={styles.ghostBtn} onPress={onExit}>
-                <Text style={styles.ghostBtnText}>{t('home', lang)}</Text>
+              {!daily && (
+                <Pressable
+                  style={[styles.secondaryBtn, { backgroundColor: c.fill }]}
+                  onPress={() => {
+                    stateRef.current = newGame({ ...config, seed: config.seed + 1 });
+                    aiMoveCounter.current = 0;
+                    recorded.current = false;
+                    bump();
+                  }}
+                >
+                  <Text style={[styles.secondaryBtnText, { color: c.tint }]}>
+                    {t('rematch', lang)}
+                  </Text>
+                </Pressable>
+              )}
+              <Pressable
+                style={[styles.secondaryBtn, { backgroundColor: c.fill }]}
+                onPress={onExit}
+              >
+                <Text style={[styles.secondaryBtnText, { color: c.tint }]}>{t('home', lang)}</Text>
               </Pressable>
             </View>
           </View>
@@ -202,74 +252,52 @@ export function GameScreen({ config, lang, onExit }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg, paddingTop: 60, paddingHorizontal: 12 },
-  topBar: {
+  container: { flex: 1, paddingTop: 56 },
+  navBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    paddingHorizontal: 12,
+    paddingBottom: 8,
+    gap: 8,
   },
-  back: { color: colors.textDim, fontSize: font.body, fontWeight: '700' },
-  timerText: { color: colors.primary, fontWeight: '800', fontSize: font.h2 },
-  timerTrack: {
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: colors.surface,
-    overflow: 'hidden',
-  },
-  timerFill: { height: '100%', borderRadius: 3 },
-  aiThinking: {
-    color: colors.o,
-    textAlign: 'center',
-    marginTop: 16,
-    fontWeight: '700',
-    fontSize: font.body,
-  },
+  navBack: { flexDirection: 'row', alignItems: 'center', gap: 3, minWidth: 90 },
+  navBackChevron: { fontSize: 26, fontWeight: '500', marginTop: -3 },
+  navBackText: { fontSize: font.body },
+  navTitle: { flex: 1, textAlign: 'center', fontSize: font.body, fontWeight: '600' },
+  navTimer: { minWidth: 90, textAlign: 'right', fontSize: font.body, fontWeight: '600' },
+  timerTrack: { height: 3, marginHorizontal: 16, borderRadius: 2, overflow: 'hidden' },
+  timerFill: { height: '100%', borderRadius: 2 },
+  aiThinking: { textAlign: 'center', marginTop: 16, fontSize: font.sub },
   toast: {
     position: 'absolute',
     bottom: 60,
     alignSelf: 'center',
-    backgroundColor: colors.danger,
     borderRadius: radius.md,
     paddingHorizontal: 18,
     paddingVertical: 10,
   },
-  toastText: { color: '#fff', fontWeight: '700' },
+  toastText: { color: '#fff', fontWeight: '600' },
   resultBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(4,8,16,0.85)',
+    backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    padding: 28,
   },
   resultCard: {
     width: '100%',
-    maxWidth: 360,
-    backgroundColor: colors.surfaceHigh,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    padding: 26,
+    maxWidth: 340,
+    borderRadius: radius.xl,
+    padding: 24,
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
-  resultEmoji: { fontSize: 54 },
-  resultText: { color: colors.text, fontSize: font.h1, fontWeight: '900' },
-  resultScore: { color: colors.textDim, fontSize: font.body, fontWeight: '600' },
-  resultButtons: { flexDirection: 'row', gap: 12, marginTop: 10 },
-  primaryBtn: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingHorizontal: 22,
-    paddingVertical: 12,
-  },
-  primaryBtnText: { color: colors.bg, fontWeight: '800', fontSize: font.body },
-  ghostBtn: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: 22,
-    paddingVertical: 12,
-  },
-  ghostBtnText: { color: colors.text, fontWeight: '700', fontSize: font.body },
+  resultEmoji: { fontSize: 52 },
+  resultText: { fontSize: font.h2, fontWeight: '700' },
+  resultScore: { fontSize: font.sub },
+  resultButtons: { alignSelf: 'stretch', gap: 8, marginTop: 12 },
+  primaryBtn: { borderRadius: radius.md, paddingVertical: 13, alignItems: 'center' },
+  primaryBtnText: { color: '#fff', fontWeight: '600', fontSize: font.body },
+  secondaryBtn: { borderRadius: radius.md, paddingVertical: 13, alignItems: 'center' },
+  secondaryBtnText: { fontWeight: '600', fontSize: font.body },
 });

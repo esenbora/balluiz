@@ -155,3 +155,33 @@ test('search jenerik altyapısı boş sorguda boş döner', () => {
   const idx = buildIndex(PLAYERS, (p) => p.name);
   assert.deepEqual(search(idx, '   '), []);
 });
+
+test('meydan okuma kodu: seed <-> kod gidiş-dönüşü', async () => {
+  const { seedToCode, codeToSeed } = await import('../src/social/daily');
+  for (const seed of [0, 1, 42, 123456789, 0xfffffffe]) {
+    assert.equal(codeToSeed(seedToCode(seed)), seed);
+  }
+  assert.equal(codeToSeed(''), null);
+  assert.equal(codeToSeed('!!!'), null);
+});
+
+test('günün gridi: aynı gün aynı seed, farklı gün farklı seed', async () => {
+  const { dailySeed, dailyNumber } = await import('../src/social/daily');
+  const d1 = new Date('2026-08-10T09:00:00');
+  const d1b = new Date('2026-08-10T22:00:00');
+  const d2 = new Date('2026-08-11T09:00:00');
+  assert.equal(dailySeed(d1), dailySeed(d1b));
+  assert.notEqual(dailySeed(d1), dailySeed(d2));
+  assert.equal(dailyNumber(d2), dailyNumber(d1) + 1);
+});
+
+test('paylaşım metni: spoiler yok, skor ve grid var', async () => {
+  const { buildShareText } = await import('../src/social/daily');
+  const state = newGame(CONFIG);
+  const p = cellSolutions(state, 0)[0];
+  play(state, 0, p.name);
+  const text = buildShareText(state, { daily: true, dailyNo: 5, lang: 'tr' });
+  assert.ok(text.includes('Günün Gridi #5'));
+  assert.ok(text.includes('🟦'));
+  assert.ok(!text.includes(p.name), 'paylaşım metni oyuncu adı sızdırmamalı');
+});
