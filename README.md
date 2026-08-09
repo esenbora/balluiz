@@ -14,8 +14,10 @@ App Store hem Google Play hedefli.
 - Türkçe karakter toleranslı arama: `sukur` → *Hakan Şükür*
 - 3 zorluk seviyeli bot (yalnızca adil bilgi kullanır) + aynı telefonda 2 kişi
 - Çalma kuralı (3 hak), 30 sn tur süresi, maç başına tek kullanımlık isimler
-- **9.000+ gerçek oyuncu** (Wikidata, CC0) + 6.500+ Wikimedia Commons fotoğrafı;
-  570 el ile doğrulanmış çekirdek kayıt (Süper Lig ağırlıklı)
+- **10.000+ gerçek oyuncu garantisi** (testle sabitlenmiş; Wikidata, CC0) +
+  binlerce Wikimedia Commons fotoğrafı; 570 el ile doğrulanmış çekirdek kayıt
+- **117 kulüp** (10 Süper Lig kulübü dahil), her biri kulüp renklerinde özgün
+  çizim SVG armayla
 - Bilinirlik eşiği + "güvenilir havuz" grid üretimi: her hücre bilinen
   oyuncularla çözülebilir
 - TR/EN arayüz, koyu tema, tamamen çevrimdışı

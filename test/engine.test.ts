@@ -156,6 +156,25 @@ test('search jenerik altyapısı boş sorguda boş döner', () => {
   assert.deepEqual(search(idx, '   '), []);
 });
 
+test('GARANTİ: birleşik havuz en az 10.000 oyuncu içerir', async () => {
+  const { ALL_PLAYERS } = await import('../src/data');
+  assert.ok(
+    ALL_PLAYERS.length >= 10000,
+    `havuz ${ALL_PLAYERS.length} oyuncu — 10.000 garantisinin altında!`,
+  );
+});
+
+test('kulüp verisi bütünlüğü: benzersiz id, geçerli renkler', () => {
+  const ids = new Set<string>();
+  for (const club of clubById.values()) {
+    assert.ok(!ids.has(club.id), `çift kulüp id: ${club.id}`);
+    ids.add(club.id);
+    assert.match(club.color, /^#[0-9A-Fa-f]{6}$/, `${club.id}: geçersiz renk`);
+    assert.match(club.alt, /^#[0-9A-Fa-f]{6}$/, `${club.id}: geçersiz ikincil renk`);
+    assert.ok(club.short.length >= 2 && club.short.length <= 4, `${club.id}: kısaltma uzunluğu`);
+  }
+});
+
 test('meydan okuma kodu: seed <-> kod gidiş-dönüşü', async () => {
   const { seedToCode, codeToSeed } = await import('../src/social/daily');
   for (const seed of [0, 1, 42, 123456789, 0xfffffffe]) {

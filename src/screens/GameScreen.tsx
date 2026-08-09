@@ -10,6 +10,7 @@ import type { GameConfig, GameState } from '../engine/types';
 import { font, radius, useTheme } from '../theme';
 import { Lang, t } from '../i18n';
 import { buildShareText, dailyNumber } from '../social/daily';
+import { ShareIcon, TrophyIcon } from '../components/icons';
 import { recordResult } from '../social/stats';
 
 interface Props {
@@ -202,16 +203,30 @@ export function GameScreen({ config, daily, challengeCode, lang, onExit }: Props
       <Modal visible={!!state.winner} transparent animationType="fade">
         <View style={styles.resultBackdrop}>
           <View style={[styles.resultCard, { backgroundColor: c.card }]}>
-            <Text style={styles.resultEmoji}>
-              {state.winner === 'draw' ? '🤝' : state.winner === 'X' ? '🏆' : '🥈'}
-            </Text>
+            <View
+              style={[
+                styles.resultBadge,
+                {
+                  backgroundColor:
+                    state.winner === 'X' ? c.tint + '22' : c.fill,
+                },
+              ]}
+            >
+              <TrophyIcon
+                size={34}
+                color={state.winner === 'X' ? c.tint : c.secondaryLabel}
+              />
+            </View>
             <Text style={[styles.resultText, { color: c.label }]}>{resultText()}</Text>
             <Text style={[styles.resultScore, { color: c.secondaryLabel }]}>
               {labelX} {capturedX} — {capturedO} {labelO}
             </Text>
             <View style={styles.resultButtons}>
               <Pressable style={[styles.primaryBtn, { backgroundColor: c.tint }]} onPress={share}>
-                <Text style={styles.primaryBtnText}>{t('share', lang)}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <ShareIcon size={17} color="#fff" />
+                  <Text style={styles.primaryBtnText}>{t('share', lang)}</Text>
+                </View>
               </Pressable>
               {!daily && (
                 <Pressable
@@ -300,7 +315,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  resultEmoji: { fontSize: 52 },
+  resultBadge: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
   resultText: { fontSize: font.h2, fontWeight: '700' },
   resultScore: { fontSize: font.sub },
   resultButtons: { alignSelf: 'stretch', gap: 8, marginTop: 12 },

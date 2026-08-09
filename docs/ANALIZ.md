@@ -77,6 +77,11 @@ ve tamamen offline). Online için önerilen mimari (Faz 2):
   logoları ve arma görselleri ise lisanslıdır** — bu yüzden UI'da logo değil
   kulüp rengi + kısaltma rozetleri kullanıyoruz. Kulüp/oyuncu adlarının
   bilgi amaçlı (nominative) kullanımı türdeki tüm oyunların ortak pratiği.
+- **Kulüp armaları:** gerçek logolar tescilli markadır ve lisans gerektirir
+  (özellikle TR kulüpleri logo lisanslamayı aktif takip eder). Uygulamadaki
+  armalar kulüp renklerini taşıyan **özgün çizim kalkanlardır** — kimlik
+  hissi verir, marka ihlali oluşturmaz. Gerçek logo istenirse yol: kulüp/lig
+  lisans anlaşması (ör. Süper Lig için kulüplerle tek tek ya da lig üzerinden).
 - Oyuncu verisi: Wikidata (CC0). Oyuncu fotoğrafları: Wikimedia Commons
   (özgür lisanslı; uygulama içinde ve mağaza kaydında atıf verilir, ayrıntı
   için `docs/LANSMAN.md`). Fotoğraflar cihaza gömülmez, Commons'tan yüklenir;

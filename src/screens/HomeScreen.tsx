@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BotIcon, FlameIcon, GlobeIcon, PeopleIcon, SwordsIcon } from '../components/icons';
 import type { Difficulty, GameMode } from '../engine/types';
 import { font, radius, useTheme } from '../theme';
 import { Lang, t } from '../i18n';
@@ -110,12 +111,12 @@ export function HomeScreen({
 
       {/* Modlar — gruplu liste */}
       <View style={[styles.group, { backgroundColor: c.card }]}>
-        <Row icon="🤖" tile="#5E5CE6" title={t('playAi', lang)} onPress={() => onStart('ai')} c={c} />
+        <Row icon={<BotIcon />} tile="#5E5CE6" title={t('playAi', lang)} onPress={() => onStart('ai')} c={c} />
         <Separator c={c} />
-        <Row icon="👥" tile="#34C759" title={t('playLocal', lang)} onPress={() => onStart('local')} c={c} />
+        <Row icon={<PeopleIcon />} tile="#34C759" title={t('playLocal', lang)} onPress={() => onStart('local')} c={c} />
         <Separator c={c} />
         <Row
-          icon="⚔️"
+          icon={<SwordsIcon />}
           tile="#FF9500"
           title={t('challenge', lang)}
           subtitle={t('challengeSub', lang)}
@@ -123,7 +124,7 @@ export function HomeScreen({
           c={c}
         />
         <Separator c={c} />
-        <Row icon="🌍" tile="#8E8E93" title={t('online', lang)} subtitle={t('onlineSoon', lang)} disabled c={c} />
+        <Row icon={<GlobeIcon />} tile="#8E8E93" title={t('online', lang)} subtitle={t('onlineSoon', lang)} disabled c={c} />
       </View>
 
       {/* Zorluk — segmented control */}
@@ -161,7 +162,7 @@ export function HomeScreen({
         <StatDivider c={c} />
         <Stat value={`%${winRate}`} label={t('statWinRate', lang)} c={c} />
         <StatDivider c={c} />
-        <Stat value={`${stats.streak}🔥`} label={t('statStreak', lang)} c={c} />
+        <Stat value={String(stats.streak)} label={t('statStreak', lang)} icon={<FlameIcon size={13} color={c.orange} />} c={c} />
         <StatDivider c={c} />
         <Stat value={String(stats.bestStreak)} label={t('statBest', lang)} c={c} />
       </View>
@@ -178,7 +179,7 @@ export function HomeScreen({
       <Modal visible={challengeOpen} transparent animationType="fade">
         <View style={styles.modalBackdrop}>
           <View style={[styles.modalCard, { backgroundColor: c.card }]}>
-            <Text style={[styles.modalTitle, { color: c.label }]}>⚔️ {t('challenge', lang)}</Text>
+            <Text style={[styles.modalTitle, { color: c.label }]}>{t('challenge', lang)}</Text>
             <Text style={[styles.modalSub, { color: c.secondaryLabel }]}>
               {t('challengeSub', lang)}
             </Text>
@@ -233,7 +234,7 @@ function Row({
   disabled,
   c,
 }: {
-  icon: string;
+  icon: React.ReactNode;
   tile: string;
   title: string;
   subtitle?: string;
@@ -248,7 +249,7 @@ function Row({
       style={({ pressed }) => [styles.row, pressed && { backgroundColor: c.fill }]}
     >
       <View style={[styles.rowTile, { backgroundColor: tile, opacity: disabled ? 0.5 : 1 }]}>
-        <Text style={styles.rowTileIcon}>{icon}</Text>
+        {icon}
       </View>
       <View style={{ flex: 1 }}>
         <Text style={[styles.rowTitle, { color: disabled ? c.tertiaryLabel : c.label }]}>
@@ -278,15 +279,20 @@ function Separator({ c }: { c: ReturnType<typeof useTheme> }) {
 function Stat({
   value,
   label,
+  icon,
   c,
 }: {
   value: string;
   label: string;
+  icon?: React.ReactNode;
   c: ReturnType<typeof useTheme>;
 }) {
   return (
     <View style={styles.stat}>
-      <Text style={[styles.statValue, { color: c.label }]}>{value}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+        <Text style={[styles.statValue, { color: c.label }]}>{value}</Text>
+        {icon}
+      </View>
       <Text style={[styles.statLabel, { color: c.secondaryLabel }]}>{label}</Text>
     </View>
   );
@@ -336,7 +342,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  rowTileIcon: { fontSize: 17 },
   rowTitle: { fontSize: font.body, fontWeight: '500' },
   rowSub: { fontSize: font.small, marginTop: 1 },
   rowChevron: { fontSize: font.h2, fontWeight: '500' },

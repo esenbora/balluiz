@@ -48,8 +48,8 @@ const dict = {
   possibleAnswers: { tr: 'olası cevap', en: 'possible answers' },
   howToTitle: { tr: 'Nasıl oynanır?', en: 'How to play' },
   howToText: {
-    tr: 'Satır ve sütundaki iki kritere birden uyan futbolcuyu bul, hücreyi kap. Üçlüyü tamamlayan kazanır. Yanlış cevap sırayı rakibe verir; ⚡ ile dolu hücre çalınabilir.',
-    en: 'Name a player matching both the row and column criteria to claim the cell. Three in a row wins. A wrong answer passes the turn; use ⚡ to steal an occupied cell.',
+    tr: 'Satır ve sütundaki iki kritere birden uyan futbolcuyu bul, hücreyi kap. Üçlüyü tamamlayan kazanır. Yanlış cevap sırayı rakibe verir; çalma hakkıyla dolu hücre geri alınabilir.',
+    en: 'Name a player matching both the row and column criteria to claim the cell. Three in a row wins. A wrong answer passes the turn; use a steal to take an occupied cell.',
   },
   finalScore: { tr: 'Skor', en: 'Score' },
   share: { tr: 'Sonucu Paylaş', en: 'Share Result' },

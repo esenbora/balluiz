@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { GameState, Mark } from '../engine/types';
 import { font, radius, useTheme, Palette } from '../theme';
+import { BoltIcon } from './icons';
 
 interface Props {
   state: GameState;
@@ -39,9 +40,18 @@ function PlayerCard({
         <Text style={[styles.label, { color: c.label }]} numberOfLines={1}>
           {label}
         </Text>
-        <Text style={[styles.steals, { color: c.orange }]}>
-          {steals > 0 ? `${'⚡'.repeat(steals)}` : '·'}
-        </Text>
+        <View style={styles.stealsRow}>
+          <BoltIcon size={11} color={steals > 0 ? c.orange : c.tertiaryLabel} />
+          {[0, 1, 2].map((i) => (
+            <View
+              key={i}
+              style={[
+                styles.pip,
+                { backgroundColor: i < steals ? c.orange : c.fill },
+              ]}
+            />
+          ))}
+        </View>
       </View>
       <Text style={[styles.captured, { color }]}>{captured}</Text>
     </View>
@@ -94,6 +104,7 @@ const styles = StyleSheet.create({
   },
   markText: { fontWeight: '700', fontSize: font.sub },
   label: { fontWeight: '600', fontSize: font.small },
-  steals: { fontSize: 10 },
+  stealsRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 },
+  pip: { width: 6, height: 6, borderRadius: 3 },
   captured: { fontWeight: '700', fontSize: font.h2 },
 });
