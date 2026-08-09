@@ -9,14 +9,18 @@
     "react-native": "0.86.2"
   },
   "devDependencies": {
+    "@types/node": "^26.2.0",
     "@types/react": "~19.2.2",
+    "tsx": "^4.23.11",
     "typescript": "~6.0.3"
   },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "tsx --test test/engine.test.ts",
+    "typecheck": "tsc --noEmit"
   },
   "private": true
 }
