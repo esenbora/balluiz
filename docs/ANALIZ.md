@@ -44,7 +44,7 @@ girebiliyor. Zayıf nokta **uygulama kalitesi ve veri genişliği**. Yani pazara
 | TACTICO zayıflığı | Balluiz çözümü |
 |---|---|
 | Klavye/arama hataları | Türkçe karakter toleranslı normalize arama: "sukur" → Şükür, "gundogan" → Gündoğan (`src/engine/normalize.ts`, testli) |
-| 500 kartlık dar havuz | El ile doğrulanmış çekirdek veri (~300 oyuncu, Süper Lig ağırlıklı) + **Wikidata'dan binlerce oyuncuya ölçekleme scripti** (`scripts/wikidata-import.mjs`, CC0 lisans) |
+| 500 kartlık dar havuz | El ile doğrulanmış çekirdek veri (550+ oyuncu, Süper Lig ağırlıklı) + **Wikidata'dan binlerce oyuncuya ölçekleme scripti** (`scripts/wikidata-import.mjs`, CC0 lisans) |
 | Kasma/ısınma | Saf TypeScript motor, ağır render yok; oyun mantığı UI'dan ayrık ve birim testli |
 | Sıradan görünüm | Koyu, saha-yeşili premium tema; kulüp renkleriyle rozetler |
 | — | Deterministik seed'li grid üretimi → "günün gridi" ve grid paylaşımı için hazır altyapı |

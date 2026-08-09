@@ -70,7 +70,7 @@ sonradan değişmez.
 
 | Faz | Kapsam | Mağaza etkisi |
 |---|---|---|
-| **MVP (bu PR)** | Bot + yerel 2 kişi, ~300 oyuncu, TR/EN | İlk yayın; "veri toplanmıyor" etiketi |
+| **MVP (bu PR)** | Bot + yerel 2 kişi, 550+ oyuncu, TR/EN | İlk yayın; "veri toplanmıyor" etiketi |
 | **Faz 1.1** | Wikidata import ile 2.000+ oyuncu, günün gridi, ses/haptik | Tutundurma (D1/D7) |
 | **Faz 2** | Supabase online eşleşme + Elo + sıralama | "Gerçek kullanıcılar" hedefi; anonim auth |
 | **Faz 2.1** | AdMob geçişli reklam / reklamsız IAP (₺) | Gelir; gizlilik etiketi güncellenir |

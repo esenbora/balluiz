@@ -32,7 +32,9 @@ export function HomeScreen({ lang, difficulty, onChangeLang, onChangeDifficulty,
       </View>
 
       <View style={styles.hero}>
-        <Text style={styles.logoBall}>⚽</Text>
+        <View style={styles.logoRing}>
+          <Text style={styles.logoBall}>⚽</Text>
+        </View>
         <Text style={styles.title}>{t('appName', lang)}</Text>
         <Text style={styles.tagline}>{t('tagline', lang)}</Text>
       </View>
@@ -65,6 +67,11 @@ export function HomeScreen({ lang, difficulty, onChangeLang, onChangeDifficulty,
           <Text style={styles.secondaryBtnText}>{t('online', lang)}</Text>
           <Text style={styles.soon}>{t('onlineSoon', lang)}</Text>
         </View>
+
+        <View style={styles.howTo}>
+          <Text style={styles.howToTitle}>{t('howToTitle', lang)}</Text>
+          <Text style={styles.howToText}>{t('howToText', lang)}</Text>
+        </View>
       </View>
     </View>
   );
@@ -83,8 +90,23 @@ const styles = StyleSheet.create({
   langBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   langText: { color: colors.textDim, fontWeight: '800', fontSize: font.small },
   langTextActive: { color: colors.bg },
-  hero: { alignItems: 'center', marginTop: 48, marginBottom: 40, gap: 6 },
-  logoBall: { fontSize: 56 },
+  hero: { alignItems: 'center', marginTop: 36, marginBottom: 32, gap: 8 },
+  logoRing: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    borderWidth: 2.5,
+    borderColor: colors.primary,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.primary,
+    shadowOpacity: 0.5,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 8,
+  },
+  logoBall: { fontSize: 48 },
   title: { color: colors.text, fontSize: font.title, fontWeight: '900', letterSpacing: 1 },
   tagline: { color: colors.textDim, fontSize: font.body },
   menu: { gap: 14 },
@@ -119,4 +141,15 @@ const styles = StyleSheet.create({
   secondaryBtnText: { color: colors.text, fontWeight: '800', fontSize: font.body },
   disabledBtn: { opacity: 0.55 },
   soon: { color: colors.accent, fontSize: font.small, fontWeight: '600' },
+  howTo: {
+    marginTop: 8,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.accent,
+    padding: 14,
+    gap: 6,
+  },
+  howToTitle: { color: colors.accent, fontWeight: '800', fontSize: font.small },
+  howToText: { color: colors.textDim, fontSize: font.small, lineHeight: 18 },
 });

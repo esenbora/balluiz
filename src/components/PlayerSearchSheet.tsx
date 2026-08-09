@@ -22,13 +22,14 @@ interface Props {
   visible: boolean;
   row: Criterion | null;
   col: Criterion | null;
+  hintCount: number;
   lang: Lang;
   onSubmit: (name: string) => void;
   onClose: () => void;
 }
 
 // Hücreye cevap girme alt sayfası: anlık öneriler, Türkçe karakter toleransı.
-export function PlayerSearchSheet({ visible, row, col, lang, onSubmit, onClose }: Props) {
+export function PlayerSearchSheet({ visible, row, col, hintCount, lang, onSubmit, onClose }: Props) {
   const [query, setQuery] = useState('');
   const suggestions = useMemo(() => (query.length >= 2 ? searchPlayers(query) : []), [query]);
 
@@ -54,7 +55,9 @@ export function PlayerSearchSheet({ visible, row, col, lang, onSubmit, onClose }
             <Text style={styles.plus}>+</Text>
             {col && <CriterionChip criterion={col} />}
           </View>
-          <Text style={styles.hint}>{t('searchHint', lang)}</Text>
+          <Text style={styles.hint}>
+            {t('searchHint', lang)} · {hintCount} {t('possibleAnswers', lang)}
+          </Text>
           <TextInput
             style={styles.input}
             value={query}

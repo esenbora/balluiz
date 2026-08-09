@@ -34,6 +34,17 @@ const dict = {
   giveUp: { tr: 'Pas', en: 'Pass' },
   cancel: { tr: 'Vazgeç', en: 'Cancel' },
   seconds: { tr: 'sn', en: 's' },
+  you: { tr: 'Sen', en: 'You' },
+  bot: { tr: 'Bot', en: 'Bot' },
+  player1: { tr: '1. Oyuncu', en: 'Player 1' },
+  player2: { tr: '2. Oyuncu', en: 'Player 2' },
+  possibleAnswers: { tr: 'olası cevap', en: 'possible answers' },
+  howToTitle: { tr: 'Nasıl oynanır?', en: 'How to play' },
+  howToText: {
+    tr: 'Satır ve sütundaki iki kritere birden uyan futbolcuyu bul, hücreyi kap. Üçlüyü tamamlayan kazanır. Yanlış cevap sırayı rakibe verir; ⚡ ile dolu hücre çalınabilir.',
+    en: 'Name a player matching both the row and column criteria to claim the cell. Three in a row wins. A wrong answer passes the turn; use ⚡ to steal an occupied cell.',
+  },
+  finalScore: { tr: 'Skor', en: 'Score' },
 } as const;
 
 export type TKey = keyof typeof dict;
