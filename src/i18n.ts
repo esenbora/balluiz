@@ -59,6 +59,10 @@ const dict = {
   statStreak: { tr: 'Seri', en: 'Streak' },
   statBest: { tr: 'En iyi seri', en: 'Best streak' },
   code: { tr: 'Kod', en: 'Code' },
+  credits: {
+    tr: 'Veri: Wikidata (CC0) · Fotoğraflar: Wikimedia Commons',
+    en: 'Data: Wikidata (CC0) · Photos: Wikimedia Commons',
+  },
 } as const;
 
 export type TKey = keyof typeof dict;

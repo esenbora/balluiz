@@ -1,4 +1,5 @@
-import { PLAYERS, PlayerSeed } from '../data/players';
+import { PlayerSeed } from '../data/players';
+import { ALL_PLAYERS, GamePlayer } from '../data';
 import { CLUBS, NATIONS, clubById, nationById } from '../data/clubs';
 import type { Criterion, Grid } from './types';
 
@@ -16,7 +17,7 @@ export function rng(seed: number): () => number {
 
 const byClub = new Map<string, PlayerSeed[]>();
 const byNation = new Map<string, PlayerSeed[]>();
-for (const p of PLAYERS) {
+for (const p of ALL_PLAYERS) {
   for (const c of p.clubs) {
     if (!byClub.has(c)) byClub.set(c, []);
     byClub.get(c)!.push(p);
@@ -41,11 +42,18 @@ export function criterionLabel(c: Criterion): string {
 
 const MIN_SOLUTIONS = 2;
 
+// Grid üretiminde hücre çözülebilirliği yalnızca "güvenilir havuz" üzerinden
+// sayılır: küratörlü kayıtlar + yüksek bilinirlikli (pop >= 0.15) Wikidata
+// kayıtları. Böylece her hücre, bilinen oyuncularla çözülebilir; düşük
+// bilinirlikli kayıtlar yine geçerli cevap olarak kabul edilir ama bir
+// hücrenin TEK çözümü olamaz.
+const RELIABLE: GamePlayer[] = ALL_PLAYERS.filter((p) => p.curated || p.pop >= 0.15);
+
 // Kulüp-kulüp ve ülke-kulüp ortak oyuncu sayıları (grid üretimini hızlandırır).
 const clubPairCount = new Map<string, number>();
 const nationClubCount = new Map<string, number>();
 const pairKey = (a: string, b: string) => (a < b ? `${a}|${b}` : `${b}|${a}`);
-for (const p of PLAYERS) {
+for (const p of RELIABLE) {
   for (let i = 0; i < p.clubs.length; i++) {
     const nk = `${p.nat}~${p.clubs[i]}`;
     nationClubCount.set(nk, (nationClubCount.get(nk) ?? 0) + 1);
@@ -73,10 +81,17 @@ function shuffled<T>(arr: T[], rand: () => number): T[] {
  * 3 sütun (kulüp) + 3 satır (kulüp veya ülke) seçer; 9 hücrenin her birinde
  * en az MIN_SOLUTIONS çözüm olduğunu garanti eder.
  */
+const reliableByClub = new Map<string, number>();
+const reliableByNation = new Map<string, number>();
+for (const p of RELIABLE) {
+  for (const c of p.clubs) reliableByClub.set(c, (reliableByClub.get(c) ?? 0) + 1);
+  reliableByNation.set(p.nat, (reliableByNation.get(p.nat) ?? 0) + 1);
+}
+
 export function generateGrid(seed: number): Grid {
   const rand = rng(seed);
-  const clubIds = CLUBS.map((c) => c.id).filter((id) => (byClub.get(id)?.length ?? 0) >= 6);
-  const nationIds = NATIONS.map((n) => n.id).filter((id) => (byNation.get(id)?.length ?? 0) >= 6);
+  const clubIds = CLUBS.map((c) => c.id).filter((id) => (reliableByClub.get(id) ?? 0) >= 6);
+  const nationIds = NATIONS.map((n) => n.id).filter((id) => (reliableByNation.get(id) ?? 0) >= 6);
 
   for (let attempt = 0; attempt < 200; attempt++) {
     const cols = shuffled(clubIds, rand).slice(0, 3);

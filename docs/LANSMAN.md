@@ -70,13 +70,27 @@ sonradan değişmez.
 
 | Faz | Kapsam | Mağaza etkisi |
 |---|---|---|
-| **MVP (bu PR)** | Bot + yerel 2 kişi, 550+ oyuncu, TR/EN | İlk yayın; "veri toplanmıyor" etiketi |
-| **Faz 1.1** | Wikidata import ile 2.000+ oyuncu, günün gridi, ses/haptik | Tutundurma (D1/D7) |
+| **MVP (bu PR)** | Bot + yerel 2 kişi, 9.000+ oyuncu + fotoğraf, TR/EN | İlk yayın; fotoğraflar Commons'tan yüklendiği için gizlilik etiketi yine "veri toplanmıyor" (üçüncü taraf takip yok) |
+| **Faz 1.1** | Maç sayısı bazlı veri filtresi (P1350), ses/haptik | Tutundurma (D1/D7) |
 | **Faz 2** | Supabase online eşleşme + Elo + sıralama | "Gerçek kullanıcılar" hedefi; anonim auth |
 | **Faz 2.1** | AdMob geçişli reklam / reklamsız IAP (₺) | Gelir; gizlilik etiketi güncellenir |
 | **Faz 3** | Sezonluk ligler, arkadaş odası, paylaşılabilir sonuç kartı | Viral döngü |
 
-## 5. Veri büyütme (oyuncu genişliği)
+## 5. Veri kalitesi ve büyütme (oyuncu genişliği)
+
+**Mevcut durum:** `scripts/wikidata-import.mjs` 58 kulübün kadrosunu çekti →
+13.074 ham kayıt; bilinirlik eşiği (sitelink >= 6) sonrası **9.295 oyunculuk
+birleşik havuz**, 6.515'i Wikimedia Commons fotoğraflı.
+
+**Bilinen kısıt (3 bağımsız denetçiyle örneklem doğrulaması yapıldı):**
+Wikidata'nın P54 "kulüp üyeliği" alanı altyapı/rezerv dönemlerini de
+kapsayabiliyor ve çifte vatandaşlıkta doğum vatandaşlığı gelebiliyor; hatalar
+düşük bilinirlikli kayıtlarda yoğun. Alınan önlemler: (1) sitelink eşiği,
+(2) grid hücreleri yalnızca "güvenilir havuz" (küratörlü + yüksek bilinirlik)
+ile çözülebilir sayılıyor — düşük bilinirlikli kayıt bir hücrenin tek çözümü
+olamaz. Faz 1.1'de P1350 (maç sayısı) niteleyicisiyle daha sert filtre önerilir.
+
+### Yeniden çalıştırma
 
 ```bash
 node scripts/wikidata-import.mjs   # → src/data/players.generated.json

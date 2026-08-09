@@ -8,6 +8,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import type { Difficulty, GameMode } from '../engine/types';
 import { font, radius, useTheme } from '../theme';
 import { Lang, t } from '../i18n';
@@ -81,6 +82,7 @@ export function HomeScreen({
         </View>
         <Pressable
           onPress={() => onChangeLang(lang === 'tr' ? 'en' : 'tr')}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={[styles.langBtn, { backgroundColor: c.fill }]}
         >
           <Text style={[styles.langText, { color: c.tint }]}>{lang.toUpperCase()}</Text>
@@ -88,62 +90,60 @@ export function HomeScreen({
       </View>
 
       {/* Günün Gridi — öne çıkan kart */}
-      <Pressable
-        onPress={onStartDaily}
-        style={({ pressed }) => [
-          styles.dailyCard,
-          { backgroundColor: c.tint, opacity: pressed ? 0.85 : 1 },
-        ]}
-      >
-        <View style={{ flex: 1 }}>
-          <Text style={styles.dailyTitle}>
-            📅 {t('dailyGrid', lang)} #{dailyNumber()}
-          </Text>
-          <Text style={styles.dailySub}>{t('dailySub', lang)}</Text>
-        </View>
-        <Text style={styles.chevron}>›</Text>
+      <Pressable onPress={onStartDaily} style={({ pressed }) => [{ opacity: pressed ? 0.88 : 1 }]}>
+        <LinearGradient
+          colors={['#0A84FF', '#5E5CE6']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.dailyCard}
+        >
+          <View style={styles.dailyBadge}>
+            <Text style={styles.dailyBadgeText}>{dailyNumber()}</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.dailyTitle}>{t('dailyGrid', lang)}</Text>
+            <Text style={styles.dailySub}>{t('dailySub', lang)}</Text>
+          </View>
+          <Text style={styles.chevron}>›</Text>
+        </LinearGradient>
       </Pressable>
 
       {/* Modlar — gruplu liste */}
       <View style={[styles.group, { backgroundColor: c.card }]}>
-        <Row
-          icon="🤖"
-          title={t('playAi', lang)}
-          onPress={() => onStart('ai')}
-          c={c}
-        />
+        <Row icon="🤖" tile="#5E5CE6" title={t('playAi', lang)} onPress={() => onStart('ai')} c={c} />
         <Separator c={c} />
-        <Row icon="👥" title={t('playLocal', lang)} onPress={() => onStart('local')} c={c} />
+        <Row icon="👥" tile="#34C759" title={t('playLocal', lang)} onPress={() => onStart('local')} c={c} />
         <Separator c={c} />
         <Row
           icon="⚔️"
+          tile="#FF9500"
           title={t('challenge', lang)}
           subtitle={t('challengeSub', lang)}
           onPress={() => setChallengeOpen(true)}
           c={c}
         />
         <Separator c={c} />
-        <Row icon="🌍" title={t('online', lang)} subtitle={t('onlineSoon', lang)} disabled c={c} />
+        <Row icon="🌍" tile="#8E8E93" title={t('online', lang)} subtitle={t('onlineSoon', lang)} disabled c={c} />
       </View>
 
       {/* Zorluk — segmented control */}
       <Text style={[styles.sectionHeader, { color: c.secondaryLabel }]}>
-        {t('difficulty', lang).toUpperCase()}
+        {t('difficulty', lang).toLocaleUpperCase(lang === 'tr' ? 'tr-TR' : 'en-US')}
       </Text>
-      <View style={[styles.segmented, { backgroundColor: c.fill }]}>
+      <View style={[styles.segmented, { backgroundColor: c.segTrack }]}>
         {DIFFICULTIES.map((d) => (
           <Pressable
             key={d}
             onPress={() => onChangeDifficulty(d)}
             style={[
               styles.segment,
-              difficulty === d && { backgroundColor: c.card, ...styles.segmentActive },
+              difficulty === d && { backgroundColor: c.segSelected, ...styles.segmentActive },
             ]}
           >
             <Text
               style={[
                 styles.segmentText,
-                { color: difficulty === d ? c.label : c.secondaryLabel },
+                { color: difficulty === d ? (c.scheme === 'dark' ? '#FFFFFF' : '#000000') : c.secondaryLabel },
               ]}
             >
               {t(d, lang)}
@@ -154,7 +154,7 @@ export function HomeScreen({
 
       {/* İstatistikler */}
       <Text style={[styles.sectionHeader, { color: c.secondaryLabel }]}>
-        {t('stats', lang).toUpperCase()}
+        {t('stats', lang).toLocaleUpperCase(lang === 'tr' ? 'tr-TR' : 'en-US')}
       </Text>
       <View style={[styles.group, styles.statsRow, { backgroundColor: c.card }]}>
         <Stat value={String(stats.played)} label={t('statPlayed', lang)} c={c} />
@@ -171,6 +171,8 @@ export function HomeScreen({
         <Text style={[styles.howToTitle, { color: c.label }]}>{t('howToTitle', lang)}</Text>
         <Text style={[styles.howToText, { color: c.secondaryLabel }]}>{t('howToText', lang)}</Text>
       </View>
+
+      <Text style={[styles.credits, { color: c.tertiaryLabel }]}>{t('credits', lang)}</Text>
 
       {/* Meydan okuma modalı */}
       <Modal visible={challengeOpen} transparent animationType="fade">
@@ -224,6 +226,7 @@ export function HomeScreen({
 
 function Row({
   icon,
+  tile,
   title,
   subtitle,
   onPress,
@@ -231,6 +234,7 @@ function Row({
   c,
 }: {
   icon: string;
+  tile: string;
   title: string;
   subtitle?: string;
   onPress?: () => void;
@@ -243,7 +247,9 @@ function Row({
       disabled={disabled}
       style={({ pressed }) => [styles.row, pressed && { backgroundColor: c.fill }]}
     >
-      <Text style={styles.rowIcon}>{icon}</Text>
+      <View style={[styles.rowTile, { backgroundColor: tile, opacity: disabled ? 0.5 : 1 }]}>
+        <Text style={styles.rowTileIcon}>{icon}</Text>
+      </View>
       <View style={{ flex: 1 }}>
         <Text style={[styles.rowTitle, { color: disabled ? c.tertiaryLabel : c.label }]}>
           {title}
@@ -307,14 +313,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: radius.lg,
     padding: 18,
-    gap: 8,
+    gap: 14,
   },
+  dailyBadge: {
+    width: 46,
+    height: 46,
+    borderRadius: 13,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dailyBadgeText: { color: '#fff', fontSize: font.h2, fontWeight: '800' },
   dailyTitle: { color: '#fff', fontSize: font.body, fontWeight: '700' },
   dailySub: { color: 'rgba(255,255,255,0.75)', fontSize: font.small, marginTop: 2 },
   chevron: { color: 'rgba(255,255,255,0.7)', fontSize: 26, fontWeight: '600' },
   group: { borderRadius: radius.lg, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
-  rowIcon: { fontSize: font.h2, width: 28, textAlign: 'center' },
+  rowTile: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowTileIcon: { fontSize: 17 },
   rowTitle: { fontSize: font.body, fontWeight: '500' },
   rowSub: { fontSize: font.small, marginTop: 1 },
   rowChevron: { fontSize: font.h2, fontWeight: '500' },
@@ -338,6 +360,7 @@ const styles = StyleSheet.create({
   stat: { flex: 1, alignItems: 'center', gap: 2 },
   statValue: { fontSize: font.h2, fontWeight: '700' },
   statLabel: { fontSize: font.caption },
+  credits: { fontSize: font.caption, textAlign: 'center', marginTop: 4 },
   howToTitle: { fontSize: font.sub, fontWeight: '600' },
   howToText: { fontSize: font.small, lineHeight: 18 },
   modalBackdrop: {

@@ -77,7 +77,15 @@ ve tamamen offline). Online için önerilen mimari (Faz 2):
   logoları ve arma görselleri ise lisanslıdır** — bu yüzden UI'da logo değil
   kulüp rengi + kısaltma rozetleri kullanıyoruz. Kulüp/oyuncu adlarının
   bilgi amaçlı (nominative) kullanımı türdeki tüm oyunların ortak pratiği.
-- Oyuncu verisi: Wikidata (CC0). Fotoğraf kullanılmıyor.
+- Oyuncu verisi: Wikidata (CC0). Oyuncu fotoğrafları: Wikimedia Commons
+  (özgür lisanslı; uygulama içinde ve mağaza kaydında atıf verilir, ayrıntı
+  için `docs/LANSMAN.md`). Fotoğraflar cihaza gömülmez, Commons'tan yüklenir;
+  çevrimdışıyken baş harf monogramına düşülür.
+- **Transfermarkt kullanılmadı ve kullanılmamalı:** kullanım şartları veri
+  çekmeyi yasaklıyor; oyuncu fotoğrafları ajans lisanslı (ör. IMAGO) —
+  mağazadaki ticari bir uygulamada kullanımı telif ihlalidir ve uygulamanın
+  kaldırılmasına yol açabilir. Lisanslı ticari alternatifler: API-Football,
+  Sportmonks, StatsBomb (ücretli API'ler).
 
 ## 6. Kaynaklar
 

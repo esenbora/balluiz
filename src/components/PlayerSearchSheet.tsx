@@ -11,7 +11,8 @@ import {
   View,
 } from 'react-native';
 import { searchPlayers } from '../engine/game';
-import type { PlayerSeed } from '../data/players';
+import { Avatar } from './Avatar';
+import type { GamePlayer } from '../data';
 import { nationById } from '../data/clubs';
 import type { Criterion } from '../engine/types';
 import { CriterionChip } from './CriterionChip';
@@ -23,15 +24,26 @@ interface Props {
   row: Criterion | null;
   col: Criterion | null;
   hintCount: number;
+  secondsLeft?: number;
   lang: Lang;
   onSubmit: (name: string) => void;
   onClose: () => void;
 }
 
 // Hücreye cevap girme sayfası: iOS sheet görünümü, anlık öneriler, TR karakter toleransı.
-export function PlayerSearchSheet({ visible, row, col, hintCount, lang, onSubmit, onClose }: Props) {
+export function PlayerSearchSheet({
+  visible,
+  row,
+  col,
+  hintCount,
+  secondsLeft,
+  lang,
+  onSubmit,
+  onClose,
+}: Props) {
   const c = useTheme();
   const [query, setQuery] = useState('');
+  const [focused, setFocused] = useState(false);
   const suggestions = useMemo(() => (query.length >= 2 ? searchPlayers(query) : []), [query]);
 
   const submit = (name: string) => {
@@ -56,12 +68,27 @@ export function PlayerSearchSheet({ visible, row, col, hintCount, lang, onSubmit
             {row && <CriterionChip criterion={row} />}
             <Text style={[styles.plus, { color: c.secondaryLabel }]}>+</Text>
             {col && <CriterionChip criterion={col} />}
+            {secondsLeft !== undefined && (
+              <Text
+                style={[
+                  styles.sheetTimer,
+                  { color: secondsLeft <= 5 ? c.red : c.orange },
+                ]}
+              >{`${secondsLeft}${t('seconds', lang)}`}</Text>
+            )}
           </View>
           <Text style={[styles.hint, { color: c.secondaryLabel }]}>
             {t('searchHint', lang)} · {hintCount} {t('possibleAnswers', lang)}
           </Text>
           <TextInput
-            style={[styles.input, { backgroundColor: c.fill, color: c.label }]}
+            style={[
+              styles.input,
+              { backgroundColor: c.fill, color: c.label },
+              { borderWidth: 2, borderColor: focused ? c.tint : 'transparent' },
+              Platform.OS === 'web' && ({ outlineStyle: 'none' } as never),
+            ]}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             value={query}
             onChangeText={setQuery}
             placeholder={'🔍  ' + t('searchPlayer', lang)}
@@ -75,8 +102,9 @@ export function PlayerSearchSheet({ visible, row, col, hintCount, lang, onSubmit
           <FlatList
             data={suggestions}
             keyboardShouldPersistTaps="handled"
-            keyExtractor={(p: PlayerSeed) => p.name}
+            keyExtractor={(p: GamePlayer) => p.name}
             style={{ maxHeight: 250 }}
+            contentContainerStyle={{ paddingBottom: 12 }}
             renderItem={({ item }) => (
               <Pressable
                 style={({ pressed }) => [
@@ -86,8 +114,11 @@ export function PlayerSearchSheet({ visible, row, col, hintCount, lang, onSubmit
                 ]}
                 onPress={() => submit(item.name)}
               >
+                <Avatar player={item} size={32} />
+                <Text style={[styles.suggestionText, { color: c.label }]} numberOfLines={1}>
+                  {item.name}
+                </Text>
                 <Text style={styles.suggestionFlag}>{nationById.get(item.nat)?.flag ?? ''}</Text>
-                <Text style={[styles.suggestionText, { color: c.label }]}>{item.name}</Text>
                 <Text style={[styles.suggestionPos, { color: c.tertiaryLabel }]}>{item.pos}</Text>
               </Pressable>
             )}
@@ -119,6 +150,14 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   plus: { fontSize: font.h2, fontWeight: '600' },
+  sheetTimer: {
+    position: 'absolute',
+    right: 4,
+    top: 6,
+    fontSize: font.body,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
   hint: { textAlign: 'center', fontSize: font.small },
   input: {
     borderRadius: radius.md,
@@ -137,6 +176,6 @@ const styles = StyleSheet.create({
   suggestionFlag: { fontSize: font.body },
   suggestionText: { fontSize: font.body, flex: 1, fontWeight: '500' },
   suggestionPos: { fontSize: font.small, fontWeight: '600' },
-  cancel: { alignItems: 'center', paddingVertical: 12 },
+  cancel: { alignItems: 'center', justifyContent: 'center', minHeight: 44 },
   cancelText: { fontWeight: '600', fontSize: font.body },
 });

@@ -14,8 +14,10 @@ App Store hem Google Play hedefli.
 - Türkçe karakter toleranslı arama: `sukur` → *Hakan Şükür*
 - 3 zorluk seviyeli bot (yalnızca adil bilgi kullanır) + aynı telefonda 2 kişi
 - Çalma kuralı (3 hak), 30 sn tur süresi, maç başına tek kullanımlık isimler
-- 550+ el ile doğrulanmış oyuncu (Süper Lig ağırlıklı) + Wikidata ölçekleme
-  scripti
+- **9.000+ gerçek oyuncu** (Wikidata, CC0) + 6.500+ Wikimedia Commons fotoğrafı;
+  570 el ile doğrulanmış çekirdek kayıt (Süper Lig ağırlıklı)
+- Bilinirlik eşiği + "güvenilir havuz" grid üretimi: her hücre bilinen
+  oyuncularla çözülebilir
 - TR/EN arayüz, koyu tema, tamamen çevrimdışı
 
 ## Geliştirme

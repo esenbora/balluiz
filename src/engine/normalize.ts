@@ -42,8 +42,14 @@ export function buildIndex<T>(items: T[], text: (item: T) => string): Searchable
 /**
  * Her sorgu kelimesi, hedefin herhangi bir kelimesinin öneki olmalı.
  * Tam ad eşleşmesi en üstte, ardından soyadı önek eşleşmesi gelir.
+ * `weight` ile popüler kayıtlar eşit skorda öne çekilir (0..~2.5 önerilir).
  */
-export function search<T>(index: Searchable<T>[], query: string, limit = 8): T[] {
+export function search<T>(
+  index: Searchable<T>[],
+  query: string,
+  limit = 8,
+  weight?: (item: T) => number,
+): T[] {
   const q = normalize(query);
   if (!q) return [];
   const qTokens = q.split(' ');
@@ -68,6 +74,7 @@ export function search<T>(index: Searchable<T>[], query: string, limit = 8): T[]
     if (!allMatch) continue;
     if (entry.norm === q) score += 10;
     if (entry.norm.startsWith(q)) score += 2;
+    if (weight) score += weight(entry.item);
     scored.push({ item: entry.item, score });
   }
   scored.sort((a, b) => b.score - a.score);

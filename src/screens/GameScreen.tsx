@@ -186,11 +186,12 @@ export function GameScreen({ config, daily, challengeCode, lang, onExit }: Props
         <Scoreboard state={state} labelX={labelX} labelO={labelO} />
       </View>
 
-      <Board state={state} onCellPress={onCellPress} disabled={!!state.winner || isAiTurn} />
-
-      {isAiTurn && (
-        <Text style={[styles.aiThinking, { color: c.secondaryLabel }]}>{t('aiTurn', lang)}</Text>
-      )}
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+        <Board state={state} onCellPress={onCellPress} disabled={!!state.winner || isAiTurn} />
+        {isAiTurn && (
+          <Text style={[styles.aiThinking, { color: c.secondaryLabel }]}>{t('aiTurn', lang)}</Text>
+        )}
+      </View>
 
       {toast && (
         <View style={[styles.toast, { backgroundColor: c.red }]}>
@@ -243,6 +244,7 @@ export function GameScreen({ config, daily, challengeCode, lang, onExit }: Props
         row={criteria?.row ?? null}
         col={criteria?.col ?? null}
         hintCount={hintCount}
+        secondsLeft={secondsLeft}
         lang={lang}
         onSubmit={onSubmit}
         onClose={() => setSelectedCell(null)}
@@ -252,7 +254,7 @@ export function GameScreen({ config, daily, challengeCode, lang, onExit }: Props
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 56 },
+  container: { flex: 1, height: '100%', paddingTop: 56 },
   navBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -261,10 +263,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   navBack: { flexDirection: 'row', alignItems: 'center', gap: 3, minWidth: 90 },
-  navBackChevron: { fontSize: 26, fontWeight: '500', marginTop: -3 },
-  navBackText: { fontSize: font.body },
+  navBackChevron: { fontSize: 24, fontWeight: '600', marginTop: -2 },
+  navBackText: { fontSize: font.body, fontWeight: '400' },
   navTitle: { flex: 1, textAlign: 'center', fontSize: font.body, fontWeight: '600' },
-  navTimer: { minWidth: 90, textAlign: 'right', fontSize: font.body, fontWeight: '600' },
+  navTimer: {
+    minWidth: 90,
+    textAlign: 'right',
+    fontSize: font.body,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
   timerTrack: { height: 3, marginHorizontal: 16, borderRadius: 2, overflow: 'hidden' },
   timerFill: { height: '100%', borderRadius: 2 },
   aiThinking: { textAlign: 'center', marginTop: 16, fontSize: font.sub },

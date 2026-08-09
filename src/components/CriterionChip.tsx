@@ -11,7 +11,12 @@ export function CriterionChip({ criterion }: { criterion: Criterion }) {
     const club = clubById.get(criterion.id);
     return (
       <View style={styles.wrap}>
-        <View style={[styles.badge, { backgroundColor: club?.color ?? c.fill }]}>
+        <View
+          style={[
+            styles.badge,
+            { backgroundColor: club?.color ?? c.fill, borderColor: 'rgba(255,255,255,0.25)' },
+          ]}
+        >
           <Text style={styles.badgeText}>{club?.short ?? '?'}</Text>
         </View>
         <Text style={[styles.label, { color: c.secondaryLabel }]} numberOfLines={2}>
@@ -34,14 +39,15 @@ export function CriterionChip({ criterion }: { criterion: Criterion }) {
 const styles = StyleSheet.create({
   wrap: { alignItems: 'center', justifyContent: 'center', gap: 3, flex: 1 },
   badge: {
-    minWidth: 42,
-    paddingHorizontal: 7,
+    minWidth: 44,
+    paddingHorizontal: 8,
     height: 26,
     borderRadius: radius.sm,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   badgeText: { color: '#fff', fontWeight: '700', fontSize: font.small, letterSpacing: 0.3 },
   flag: { fontSize: 24 },
-  label: { fontSize: font.caption, textAlign: 'center', fontWeight: '500' },
+  label: { fontSize: 12, textAlign: 'center', fontWeight: '600' },
 });

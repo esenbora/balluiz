@@ -19,6 +19,9 @@ export interface Palette {
   yellow: string;
   x: string; // oyuncu X rengi (blue)
   o: string; // oyuncu O rengi (red)
+  segTrack: string;
+  segSelected: string;
+  dashed: string;
 }
 
 export const lightPalette: Palette = {
@@ -38,6 +41,9 @@ export const lightPalette: Palette = {
   yellow: '#FFCC00',
   x: '#007AFF',
   o: '#FF3B30',
+  segTrack: 'rgba(118,118,128,0.12)',
+  segSelected: '#FFFFFF',
+  dashed: 'rgba(0,0,0,0.22)',
 };
 
 export const darkPalette: Palette = {
@@ -57,6 +63,9 @@ export const darkPalette: Palette = {
   yellow: '#FFD60A',
   x: '#0A84FF',
   o: '#FF453A',
+  segTrack: 'rgba(118,118,128,0.24)',
+  segSelected: '#636366',
+  dashed: 'rgba(255,255,255,0.28)',
 };
 
 export function useTheme(): Palette {

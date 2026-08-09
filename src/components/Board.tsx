@@ -8,6 +8,8 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import type { GameState } from '../engine/types';
+import { findPlayerByName } from '../engine/game';
+import { Avatar } from './Avatar';
 import { CriterionChip } from './CriterionChip';
 import { font, radius, useTheme, Palette } from '../theme';
 
@@ -56,6 +58,8 @@ function Cell({
   }, [owner, playerName, scale]);
 
   const tint = owner === 'X' ? c.x : owner === 'O' ? c.o : null;
+  const player = playerName ? findPlayerByName(playerName) : undefined;
+  const surname = playerName ? playerName.split(' ').slice(-1)[0] : '';
 
   return (
     <Pressable onPress={onPress} disabled={disabled} style={{ width: size, height: size }}>
@@ -65,20 +69,28 @@ function Cell({
             styles.cell,
             {
               backgroundColor: tint ? tinted(tint, '1F') : pressed ? c.fill : c.card,
-              borderColor: inWinLine ? c.yellow : tint ?? c.separator,
-              borderWidth: inWinLine ? 2 : tint ? 1.5 : StyleSheet.hairlineWidth,
+              borderColor: inWinLine ? c.yellow : tint ?? c.dashed,
+              borderWidth: inWinLine ? 2 : tint ? 1.5 : 1.5,
+              borderStyle: owner ? 'solid' : 'dashed',
             },
           ]}
         >
           {owner ? (
-            <Animated.View style={{ alignItems: 'center', transform: [{ scale }], gap: 2 }}>
-              <Text style={[styles.mark, { color: tint! }]}>{owner === 'X' ? '✕' : '◯'}</Text>
-              <Text style={[styles.playerName, { color: c.secondaryLabel }]} numberOfLines={2}>
-                {playerName}
+            <Animated.View style={{ alignItems: 'center', transform: [{ scale }], gap: 3 }}>
+              {player ? (
+                <Avatar player={player} size={Math.max(30, size * 0.36)} />
+              ) : (
+                <Text style={[styles.mark, { color: tint! }]}>{owner === 'X' ? '✕' : '◯'}</Text>
+              )}
+              <Text style={[styles.playerName, { color: c.label }]} numberOfLines={1}>
+                {surname}
               </Text>
+              <View style={[styles.markBadge, { backgroundColor: tint! }]}>
+                <Text style={styles.markBadgeText}>{owner}</Text>
+              </View>
             </Animated.View>
           ) : (
-            <Text style={[styles.empty, { color: c.tertiaryLabel }]}>＋</Text>
+            <Text style={[styles.empty, { color: c.secondaryLabel }]}>＋</Text>
           )}
         </View>
       )}
@@ -89,8 +101,8 @@ function Cell({
 export function Board({ state, onCellPress, disabled }: Props) {
   const c = useTheme();
   const { width } = useWindowDimensions();
-  const size = Math.min(width - 32, 420);
-  const head = size * 0.19;
+  const size = Math.min(width - 24, 460);
+  const head = 64;
   const cell = (size - head) / 3;
 
   return (
@@ -140,6 +152,17 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   mark: { fontSize: 24, fontWeight: '700' },
-  playerName: { fontSize: 9, textAlign: 'center', fontWeight: '500' },
-  empty: { fontSize: font.h2, fontWeight: '300' },
+  playerName: { fontSize: 10, textAlign: 'center', fontWeight: '600' },
+  markBadge: {
+    position: 'absolute',
+    top: -6,
+    right: -30,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  markBadgeText: { color: '#fff', fontSize: 9, fontWeight: '800' },
+  empty: { fontSize: 28, fontWeight: '300' },
 });

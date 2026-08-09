@@ -39,7 +39,9 @@ function PlayerCard({
         <Text style={[styles.label, { color: c.label }]} numberOfLines={1}>
           {label}
         </Text>
-        <Text style={[styles.steals, { color: c.orange }]}>{'⚡'.repeat(steals) || '·'}</Text>
+        <Text style={[styles.steals, { color: c.orange }]}>
+          {steals > 0 ? `${'⚡'.repeat(steals)}` : '·'}
+        </Text>
       </View>
       <Text style={[styles.captured, { color }]}>{captured}</Text>
     </View>

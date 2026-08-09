@@ -1,6 +1,7 @@
 import type { CellState, GameConfig, GameState, GuessResult, Mark } from './types';
 import { generateGrid, matches, solutions } from './grid';
-import { PLAYERS, PlayerSeed } from '../data/players';
+import { ALL_PLAYERS, GamePlayer } from '../data';
+import type { PlayerSeed } from '../data/players';
 import { buildIndex, normalize, search } from './normalize';
 
 export const WIN_LINES: number[][] = [
@@ -14,14 +15,14 @@ export const WIN_LINES: number[][] = [
   [2, 4, 6],
 ];
 
-const nameIndex = buildIndex(PLAYERS, (p) => p.name);
-const byNormName = new Map(PLAYERS.map((p) => [normalize(p.name), p]));
+const nameIndex = buildIndex(ALL_PLAYERS, (p) => p.name);
+const byNormName = new Map(ALL_PLAYERS.map((p) => [normalize(p.name), p]));
 
-export function searchPlayers(query: string, limit = 8): PlayerSeed[] {
-  return search(nameIndex, query, limit);
+export function searchPlayers(query: string, limit = 8): GamePlayer[] {
+  return search(nameIndex, query, limit, (p) => p.pop * 2.5);
 }
 
-export function findPlayerByName(name: string): PlayerSeed | undefined {
+export function findPlayerByName(name: string): GamePlayer | undefined {
   return byNormName.get(normalize(name));
 }
 
