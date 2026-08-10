@@ -175,6 +175,15 @@ test('kulüp verisi bütünlüğü: benzersiz id, geçerli renkler', () => {
   }
 });
 
+test('gerçek arma listesi: her kayıt geçerli bir kulübe işaret eder', async () => {
+  const crests = (await import('../src/data/crests.json')).default as Record<string, string>;
+  for (const [clubId, file] of Object.entries(crests)) {
+    assert.ok(clubById.has(clubId), `crests.json: bilinmeyen kulüp ${clubId}`);
+    assert.ok(file.length > 4, `crests.json: ${clubId} dosya adı boş`);
+  }
+  assert.ok(Object.keys(crests).length >= 40, 'gerçek arma sayısı beklenmedik şekilde düştü');
+});
+
 test('meydan okuma kodu: seed <-> kod gidiş-dönüşü', async () => {
   const { seedToCode, codeToSeed } = await import('../src/social/daily');
   for (const seed of [0, 1, 42, 123456789, 0xfffffffe]) {
