@@ -77,7 +77,7 @@ ve tamamen offline). Online için önerilen mimari (Faz 2):
   logoları ve arma görselleri ise lisanslıdır** — bu yüzden UI'da logo değil
   kulüp rengi + kısaltma rozetleri kullanıyoruz. Kulüp/oyuncu adlarının
   bilgi amaçlı (nominative) kullanımı türdeki tüm oyunların ortak pratiği.
-- **Kulüp armaları (iki katman):** 46 kulübün birebir arması Wikimedia
+- **Kulüp armaları (iki katman):** 66 kulübün birebir arması Wikimedia
   Commons'tan gösterilir (Wikidata P154 — yalnızca Commons'taki serbest
   lisanslı/PD dosyalara bağlanabilir; her dosya görsel QA'dan geçirildi,
   fotoğraf/bayrak/wordmark gelenler elendi). Commons'ta arması olmayan
